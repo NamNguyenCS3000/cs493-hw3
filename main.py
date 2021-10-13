@@ -16,16 +16,9 @@ def boats_get_post():
         content = request.get_json()
         if ("name" in content and "type" in content and "length" in content):
             new_boat = datastore.entity.Entity(key=client.key(constants.boats))
-            # None ~= Null in python
             new_boat.update({"name": content["name"], "type": content["type"], "length": content["length"]})
-            print(new_boat) # <Entity('boats', 5746980898734080) {'number': 1}>
+            print(new_boat) 
             client.put(new_boat)
-            # putResult = client.put(new_boat) # print(putResult) == "None"
-            # query = client.query(kind=constants.boats)
-            # results = list(query.fetch())
-            
-            # boat_num = new_boat['number']
-            # print(str(boat_num)) # == 1
             boat_key = client.key(constants.boats, new_boat.key.id)
             print(str(boat_key))
             boat = client.get(key=boat_key)
@@ -64,13 +57,6 @@ def boats_put_patch_delete(id):
                 return (json.dumps({"Error": "No boat with this boat_id exists"}), 404)
         else:
             return (json.dumps({"Error": "The request object is missing at least one of the required attributes"}), 400)
-    # elif request.method == 'PUT':
-    #     content = request.get_json()
-    #     boat_key = client.key(constants.boats, int(id))
-    #     boat = client.get(key=boat_key)
-    #     boat.update({"name": content["name"], "description": content["description"]})
-    #     client.put(boat)
-    #     return ('',200)
     elif request.method == 'DELETE':
         boat_key = client.key(constants.boats, int(id))
         if (boat_key != None):
@@ -81,21 +67,11 @@ def boats_put_patch_delete(id):
                 query = client.query(kind=constants.slips)
                 results = list(query.fetch())
                 for e in results:
-                    # print(f"slip: {e}")
                     try:
                         slipsCurrentBoat = e["current_boat"]
                         if (int(slipsCurrentBoat) != None and slipsCurrentBoat == int(id)):
                             print(f"slip (e): {e}")
                             print(f"this boat is still assigned to slip {e.key.id}")
-
-                            # slip_key = client.key(constants.slips, int(slip_id))
-                            # # errorMsg = "The specified boat and/or slip does not exist"
-                            # if (slip_key != None):
-                            #     slip = client.get(key=slip_key)
-                            #     # print(f"slip: {slip}")
-                            #     # slipsCurrentBoat = slip["current_boat"]
-                            #     # print(f"slipsCurrentBoat: {slipsCurrentBoat}")
-                            #     if (slip != None):
                             
                             slip = client.get(key=e.key)
                             print(f"slip (slip): {slip}")
@@ -104,7 +80,6 @@ def boats_put_patch_delete(id):
                             client.put (slip)
                             slip = client.get(key=e.key)
                             print(f"slip (slip after put): {slip}")
-                            # return (json.dumps({"Error": f"Bad Request, this boat is assigned to slip {e.key.id}"}), 400)
                     except:
                         continue
 
@@ -134,16 +109,10 @@ def slips_get_post():
         content = request.get_json()
         if "number" in content:
             new_slip = datastore.entity.Entity(key=client.key(constants.slips))
-            # None ~= Null in python
             new_slip.update({"number": content["number"], "current_boat": None})
-            print(new_slip) # <Entity('slips', 5746980898734080) {'number': 1}>
+            print(new_slip)
             client.put(new_slip)
-            # putResult = client.put(new_slip) # print(putResult) == "None"
-            # query = client.query(kind=constants.slips)
-            # results = list(query.fetch())
             
-            # slip_num = new_slip['number']
-            # print(str(slip_num)) # == 1
             slip_key = client.key(constants.slips, new_slip.key.id)
             print(str(slip_key))
             slip = client.get(key=slip_key)
@@ -158,26 +127,13 @@ def slips_get_post():
         results = list(query.fetch())
         for e in results:
             e["id"] = e.key.id
-            # print(f"slip: {e}")
-            # try:
-            #     slipsCurrentBoat = e["current_boat"]
-            #     if (slipsCurrentBoat == None):
-            #         e["current_boat"] = None
-            # except:
-            #     e["current_boat"] = None
+
         return json.dumps(results)
     else:
         return 'Method not recognized'
 
 @app.route('/slips/<id>', methods=['PUT','DELETE','GET'])
 def slips_put_delete(id):
-    # if request.method == 'PUT':
-    #     content = request.get_json()
-    #     slip_key = client.key(constants.slips, int(id))
-    #     slip = client.get(key=slip_key)
-    #     slip.update({"number": content["number"], "current_boat": content["current_boat"]})
-    #     client.put(slip)
-    #     return ('',200)
     if request.method == 'DELETE':
         slip_key = client.key(constants.slips, int(id))
         if (slip_key != None):
@@ -196,13 +152,6 @@ def slips_put_delete(id):
             if (slip != None):
                 slip["id"] = slip.key.id
                 slip["self"] = str(request.url_root) + 'slips/' + str(slip.key.id)
-                # print(f"slip: {slip}")
-                # try:
-                #     slipsCurrentBoat = slip["current_boat"]
-                #     if (slipsCurrentBoat == None):
-                #         slip["current_boat"] = None
-                # except:
-                #     slip["current_boat"] = None
                 return (json.dumps(slip), 200)
             else:
                 return (json.dumps({"Error": "No slip with this slip_id exists"}), 404)
@@ -215,40 +164,25 @@ def slips_put_delete(id):
 def slips_boats_put(slip_id, boat_id):
     if request.method == 'PUT':
         slip_key = client.key(constants.slips, int(slip_id))
-        # errorMsg = "The specified boat and/or slip does not exist"
         if (slip_key != None):
             slip = client.get(key=slip_key)
-            # print(f"slip: {slip}")
-            # slipsCurrentBoat = slip["current_boat"]
-            # print(f"slipsCurrentBoat: {slipsCurrentBoat}")
             if (slip != None):
                 slipsCurrentBoat = slip["current_boat"]
-                # print(f"current boat: {slipsCurrentBoat}")
                 boat_key = client.key(constants.boats, int(boat_id))
-                # if (boat_key != None):
                 boat = client.get(key=boat_key)
-                # print(f"boat: {boat}")
                 if (boat != None):
-                    # make sure boat is not assigned to another slip
-                    # this doesn't actually work in all cases, esp. when current_boat is null, the results don't have the current_boat
-                    # may need to make a separate call to get the current_boat in this case
                     query = client.query(kind=constants.slips)
                     results = list(query.fetch())
                     for e in results:
-                        # print(f"slip: {e}")
                         try:
                             slipsCurrentBoat = e["current_boat"]
                             if (int(slipsCurrentBoat) != None and slipsCurrentBoat == int(boat_id)):
                                 print(f"Bad Request, this boat is assigned to slip {e.key.id}")
-                                # return (json.dumps({"Error": f"Bad Request, this boat is assigned to slip {e.key.id}"}), 400)
                         except:
                             continue
                 else:
                     return (json.dumps({"Error": "The specified boat and/or slip does not exist"}), 404)
-                # else:
-                #     return (json.dumps({"Error": "boat key messed The specified boat and/or slip does not exist"}), 404)
                 if (slip["current_boat"] != None):
-                    # print(str(slip["current_boat"]))
                     return (json.dumps({"Error": "The slip is not empty"}), 403)
             else:
                 return (json.dumps({"Error": "The specified boat and/or slip does not exist"}), 404)
@@ -260,7 +194,6 @@ def slips_boats_put(slip_id, boat_id):
         return ('',204)
     elif request.method == 'DELETE':
         slip_key = client.key(constants.slips, int(slip_id))
-        # errorMsg = "The specified boat and/or slip does not exist"
         if (slip_key != None):
             slip = client.get(key=slip_key)
             if (slip != None):
