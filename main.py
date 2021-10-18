@@ -16,7 +16,7 @@ def boats_get_post():
         content = request.get_json()
         if "name" in content and "type" in content and "length" in content:
             new_boat = datastore.entity.Entity(key=client.key(constants.boats))
-            new_boat.update({"name": content["name"], "type": constant["type"], "length": content["length"]})
+            new_boat.update({"name": content["name"], "type": constent["type"], "length": content["length"]})
             print(new_boat)
             client.put(new_boat)
             boat_key = client.key(constants.boats, new_boat.key.id)
