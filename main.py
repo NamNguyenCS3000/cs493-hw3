@@ -11,20 +11,29 @@ def index():
     return "Please navigate to /slips to use this API"\
         
 @app.route('/boats', methods=['POST','GET'])
-def boats_get_post():    
-    if request.method == 'POST':        
-        content = request.get_json()        
-        new_boat = datastore.entity.Entity(key=client.key(constants.lodgings))        
-        new_boat.update({"name": content["name"], "type": content["type"], "length": content["length"]})        
-        client.put(new_boat)        
-        return str(new_boat.key.id)    
-    elif request.method == 'GET':        
-        query = client.query(kind=constants.boats)        
-        results = list(query.fetch())        
-        for e in results:            
-            e["id"] = e.key.id        
-        return json.dumps(results)    
-    else:        
+def boats_get_post():
+    if request.method == 'POST':
+        content = request.get_json()
+        if "name" in content and "type" in content and "length" in content:
+            new_boat = datastore.entity.Entity(key=client.key(constants.boats))
+            new_boat.update({"name": content["name"], "type": constant["type"], "length": content["length"]})
+            print(new_boat)
+            client.put(new_boat)
+            boat_key = client.key(constants.boats, new_boat.key.id)
+            print(str(boat_key))
+            boat = client.get(key=boat_key)
+            boat["id"] = new_boat.key.id
+            boat["self"] = str(request.url_root) + 'boats/' + str(new_boat.key.id)
+            return json.dumps(boat), 201
+        else:
+            return json.dumps({"Error": "Missing data"}), 400
+    elif request.method == 'GET':
+        query = client.query(kind=constants.boats)
+        results = list(query.fetch())
+        for e in results:
+            e["id"] = e.key.id
+        return json.dumps(results)
+    else:
         return 'Method not recognized'
 
 @app.route('/boats/<id>', methods=['PUT','PATCH','DELETE','GET'])
