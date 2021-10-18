@@ -6,10 +6,6 @@ import constants
 app = Flask(__name__)
 client = datastore.Client()
 
-@app.route('/')
-def index():
-    return "Please navigate to /slips to use this API"\
-
 @app.route('/boats', methods=['POST','GET'])
 def boats_get_post():
     if request.method == 'POST':
